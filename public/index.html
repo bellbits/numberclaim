@@ -40,7 +40,7 @@
 
   <script>
     async function claim() {
-      const res = await fetch("/numberclaim", { method: "POST" });
+      const res = await fetch("/claim", { method: "POST" });
       const data = await res.json();
       document.getElementById("result").textContent =
         "Your number is " + data.number;
