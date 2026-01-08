@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Claim Your Number</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      background: #f4f4f4;
+    }
+    .box {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    button {
+      font-size: 16px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    .number {
+      margin-top: 20px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Claim Your Number</h2>
+    <button onclick="claim()">Claim</button>
+    <div class="number" id="result"></div>
+  </div>
+
+  <script>
+    async function claim() {
+      const res = await fetch("/claim", { method: "POST" });
+      const data = await res.json();
+      document.getElementById("result").textContent =
+        "Your number is " + data.number;
+    }
+  </script>
+</body>
+</html>
