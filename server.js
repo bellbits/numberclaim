@@ -3,36 +3,67 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
-const PORT = 3000;
+const PORT = 3001;
 
-app.use(express.static("public"));
+const COUNTER_FILE = path.join(__dirname, "counter.txt");
+const LOCK_FILE = path.join(__dirname, "counter.lock");
+
 app.use(express.json());
 
-const DATA_FILE = path.join(__dirname, "data.json");
+// Simple spin-lock using filesystem
+function acquireLock() {
+  while (true) {
+    try {
+      fs.writeFileSync(LOCK_FILE, process.pid.toString(), { flag: "wx" });
+      return;
+    } catch {
+      // Wait briefly and retry
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 5);
+    }
+  }
+}
 
-app.post("/claim", (req, res) => {
+function releaseLock() {
+  fs.unlinkSync(LOCK_FILE);
+}
+
+app.post("/api/claim", (req, res) => {
   try {
-    // Read current value
-    const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+    acquireLock();
 
-    if (data.current >= 60000) {
+    const current = parseInt(
+      fs.readFileSync(COUNTER_FILE, "utf8").trim(),
+      10
+    );
+
+    if (current >= 60000) {
+      releaseLock();
       return res.status(400).json({ error: "No numbers left" });
     }
 
-    // Increment
-    data.current += 1;
+    const next = current + 1;
 
-    // Persist immediately
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+    fs.writeFileSync(COUNTER_FILE, next.toString());
 
-    res.json({ number: data.current });
+    releaseLock();
+
+    res.json({ number: next });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+    try {
+      if (fs.existsSync(LOCK_FILE)) releaseLock();
+    } catch {}
+
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+// Serve static Next.js export
+app.use(express.static(path.join(__dirname, "out")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "out/index.html"));
 });
 
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
