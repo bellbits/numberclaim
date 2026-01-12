@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Claim Your Number</title>
   <style>
     body {
@@ -25,16 +25,17 @@
 
   <h1>Claim Your Unique Number</h1>
   <button id="claimBtn">Claim Number</button>
-
   <div id="result"></div>
 
   <script>
     document.getElementById("claimBtn").onclick = async () => {
-      const res = await fetch("/api/claim", { method: "POST" });
+      const res = await fetch("/claim", { method: "POST" });
       const data = await res.json();
 
       document.getElementById("result").textContent =
-        data.number ? `Your number is ${data.number}` : data.error;
+        data.number
+          ? `Your number is ${data.number}`
+          : data.error;
     };
   </script>
 
