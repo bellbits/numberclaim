@@ -6,45 +6,37 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      display: flex;
-      height: 100vh;
-      justify-content: center;
-      align-items: center;
-      background: #f4f4f4;
-    }
-    .box {
-      background: white;
-      padding: 30px;
-      border-radius: 8px;
       text-align: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin-top: 100px;
     }
     button {
-      font-size: 16px;
-      padding: 10px 20px;
+      padding: 12px 24px;
+      font-size: 18px;
       cursor: pointer;
     }
-    .number {
-      margin-top: 20px;
+    #result {
+      margin-top: 30px;
       font-size: 24px;
       font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h2>Claim Your Number</h2>
-    <button onclick="claim()">Claim</button>
-    <div class="number" id="result"></div>
-  </div>
+
+  <h1>Claim Your Unique Number</h1>
+  <button id="claimBtn">Claim Number</button>
+
+  <div id="result"></div>
 
   <script>
-    async function claim() {
-      const res = await fetch("/claim", { method: "POST" });
+    document.getElementById("claimBtn").onclick = async () => {
+      const res = await fetch("/api/claim", { method: "POST" });
       const data = await res.json();
+
       document.getElementById("result").textContent =
-        "Your number is " + data.number;
-    }
+        data.number ? `Your number is ${data.number}` : data.error;
+    };
   </script>
+
 </body>
 </html>
